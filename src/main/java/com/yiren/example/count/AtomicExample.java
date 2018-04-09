@@ -1,12 +1,15 @@
 package com.yiren.example.count;
 
+import com.yiren.annoations.ThreadSafe;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author wanghao
  * create 2018-04-08 15:16
  **/
-public class AtomicExample extends BaseExample{
+@ThreadSafe
+public class AtomicExample extends BaseExample {
 
     private AtomicInteger atomicInteger = new AtomicInteger(0);
 
