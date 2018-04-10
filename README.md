@@ -21,6 +21,38 @@
 可见性：一个线程对主内存的修改可以及时的被其他线程观察到
 有序性：一个线程观察其他线程中的指令执行顺序，由于指令重排序的存在，该观察结果一般杂乱无序
 
+## 安全发布对象
+发布对象：使一个对象能够被当前范围之外的代码使用
+对象逃逸：一种错误的发布对象。当一个对象还没有构造完成时，就使它被其他线程所见。
+
+正确发布对象
+1. 在静态初始化函数中初始化一个对象引用
+ ```java
+ //推荐使用，线程安全而且还不会造成资源的浪费
+public class SingletonEnum {
+
+    public static SingletonEnum getInstance() {
+        return Singleton.INSTANCE.getInstance();
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        private SingletonEnum singleton;
+
+        Singleton() {
+            singleton = new SingletonEnum();
+        }
+
+        public SingletonEnum getInstance() {
+            return singleton;
+        }
+    }
+}
+ ```
+2. 将对象的引用保存到volatile类型域或者AtomicReference对象中
+3. 将对象的引用保存到某个正确构造对象的final类型域中
+4. 将对象的引用保存到一个由锁保护的域中
+
 ## 线程池
 
 线程池优点：
@@ -79,3 +111,14 @@ Executor框架接口
 线程池参数配置
 + CPU密集型任务，需要尽量压榨CPU，参数可设置为NCPU+1
 + IO密集型任务，参考值可以设置为2*NCPU
+
+## 死锁
+1. 互斥条件
+2. 请求和保持条件：线程保持一个资源，有发出另一个资源的请求
+3. 不剥夺条件
+4. 循环等待条件
+
+解决方案
++ 加锁顺序一致：在案例中可以使flag=0和flag=1两种情况下的加锁顺序保持一致
++ 使用lock进行强制释放锁
++ 死锁检测（难实现）
