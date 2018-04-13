@@ -1,6 +1,7 @@
 package com.yiren.example.count;
 
 import com.yiren.annoations.NotThreadSafe;
+import com.yiren.example.BaseExample;
 
 /**
  * 常见的写法
@@ -13,7 +14,7 @@ public class CustomExample extends BaseExample {
     private static int count = 0;
 
     @Override
-    public void add() {
+    public void add(int i) {
         count++;
     }
 

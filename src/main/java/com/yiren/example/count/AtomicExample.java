@@ -1,6 +1,7 @@
 package com.yiren.example.count;
 
 import com.yiren.annoations.ThreadSafe;
+import com.yiren.example.BaseExample;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,7 +15,7 @@ public class AtomicExample extends BaseExample {
     private AtomicInteger atomicInteger = new AtomicInteger(0);
 
     @Override
-    public void add() {
+    public void add(int i) {
         atomicInteger.incrementAndGet();
     }
 

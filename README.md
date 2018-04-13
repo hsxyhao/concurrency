@@ -34,11 +34,66 @@ CAS源码解析
 2. 堆栈封闭：局部变量，无并发问题
 3. ThreadLocal线程封闭：特别好的封闭方法
 
+## 线程不全类和写法
+1. StringBuilder：线程不安全
+2. StringBuffer：线程安全，append使用synchronized
+
 ## 安全发布对象
 发布对象：使一个对象能够被当前范围之外的代码使用
-对象逃逸：一种错误的发布对象。当一个对象还没有构造完成时，就使它被其他线程所见。
+对象逃逸：一种错误的发布对象，当一个对象还没有构造完成时，就使它被其他线程所见。
 
-正确发布对象
+## 同步容器
+1. ArrayList -> Vector,Stack
+2. HashMap -> HashTable
+3. Collections.synchronizedXXX(Map,List,Set)
+
+## 并发容器J.U.C
+ArrayList -> CopyOnWriteArrayList：添加元素的时候会拷贝原来的数组，然后将数组引用指向新的数组对象
+> 1. 在数组内容给常大的情况下不建议使用（yong gc，full gc）
+> 2. 适合读多写少的场景
+> 3. 读写分离的设计思想
+> 4. 数据最终一致性，不能保证数据的实时一致性
+> 5. 使用批量操作，每次添加都会复制新的数组 
+> 6. [编发编程网-COW](http://ifeve.com/java-copy-on-write/)
+
+HashSet、TreeSet -> CopyOnWriteArraySet、ConcurrentSkipListSet
+
+HashMap、TreeMap -> ConcurrentHashMap、ConcurrentSkipListMap
+> 1. ConcurrentHashMap一定条件下性能优于ConcurrentSkipListMap
+> 2. ConcurrentSkipListMap key有序
+> 3. ConcurrentSkipListMap存取时间和线程数没有关系，意味着在线程数特别多的时候性能比ConcurrentHashMap高
+
+安全共享对象策略
+1. 线程限制：一个被线程限制的对象，由线程独占，并且只能被它占有的线程修改 -> 线程封闭
+2. 共享只读：一个共享只读的对象，在没有额外同步的情况下，可以被多个线程并发访问，但是任何线程都不能修改它 -> 不可变对象
+3. 线程安全对象：一个线程安全的对象或者容器，在内部通过同步机制来保证线程的安全，所以其他线程无需额外的同步就可以通过公共接口随意访问它 -> 同步容器
+4. 被守护对象：被守护对象只能通过获取特定的锁来访问 -> 同步容器
+
+## AQS-AbstractQueuedSynchronizer
+> 核心实现图
+![image](image/aqs.png)
+
+1. 使用Node实现FIFO队列，可以用于构建锁或其他同步装置的基础框架
+2. 利用一个int类型表示状态
+3. 使用方法是继承
+4. 子类通过继承并通过实现它的方法管理其状态{acquire和relase}的方法操纵状态
+5. 可以同时实现排它锁和共享锁模式（独占和共享）
+
+AQS同步组件
++ CountDownLatch
++ Semaphore
++ CyclicBarrier
++ **ReentrantLock**
++ Condition
++ FutureTask
+
+> **CountDownLatch**
+
+![image](image/cdl.png)
+
+线程阻塞辅助类，调用await方法会阻塞当前线程，直到计数器为0的时候调用shutdown方法才会继续进行操作
+
+## 正确发布对象
 1. 在静态初始化函数中初始化一个对象引用
  ```java
  //推荐使用，线程安全而且还不会造成资源的浪费
