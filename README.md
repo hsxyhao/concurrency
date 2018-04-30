@@ -1,11 +1,42 @@
 # 高并发
 慕课网高并发实战[课程](https://coding.imooc.com/class/195.html?mc_marking=b587280c0c1c0e76c1092aa21406565a&mc_channel=syb6)，平时学习的时候很少会接触到高并发这一模块，即使
 接触到也只是一些概念上的东西，和企业实际开发中的使用可能会有很大的出入通过这门课程的学习来和企业开发中的并发做对接
+<!-- MarkdownTOC -->
+
+- 线程安全性
+- 线程安全策略
+- 线程封闭
+- 线程不全类和写法
+- 安全发布对象
+- 同步容器
+- 并发容器J.U.C
+- 安全共享对象策略
+- AQS-AbstractQueuedSynchronizer
+    - CountDownLatch 计数器
+    - Semaphore 信号量
+    - CyclicBarrier
+        - 简介
+- ReentrantLock\(Synchronized\)的区别
+    - 可重入性
+    - 锁的实现
+    - 性能的区别
+- ReentrantLock独有的功能
+- ReentrantLock方法
+- ReentrantReadWriteLock
+- Synchronized
+- BlockQueue
+- Synchronized的优点
+- Future和FutureTask
+- 正确发布对象
+- 线程池
+- 死锁
+
+<!-- /MarkdownTOC -->
 
 ## 线程安全性
-原子性：提供了互斥访问，同一时刻只能有一个线程来对他进行访问
-可见性：一个线程对主内存的修改可以及时的被其他线程观察到
-有序性：一个线程观察其他线程中的指令执行顺序，由于指令重排序的存在，该观察结果一般杂乱无序
+1. 原子性：提供了互斥访问，同一时刻只能有一个线程来对他进行访问
+2. 可见性：一个线程对主内存的修改可以及时的被其他线程观察到
+3. 有序性：一个线程观察其他线程中的指令执行顺序，由于指令重排序的存在，该观察结果一般杂乱无序
 
 CAS源码解析
 ``` java
@@ -39,8 +70,8 @@ CAS源码解析
 2. StringBuffer：线程安全，append使用synchronized
 
 ## 安全发布对象
-发布对象：使一个对象能够被当前范围之外的代码使用
-对象逃逸：一种错误的发布对象，当一个对象还没有构造完成时，就使它被其他线程所见。
++ 发布对象：使一个对象能够被当前范围之外的代码使用
++ 对象逃逸：一种错误的发布对象，当一个对象还没有构造完成时，就使它被其他线程所见。
 
 ## 同步容器
 1. ArrayList -> Vector,Stack
@@ -63,14 +94,16 @@ HashMap、TreeMap -> ConcurrentHashMap、ConcurrentSkipListMap
 > 2. ConcurrentSkipListMap key有序
 > 3. ConcurrentSkipListMap存取时间和线程数没有关系，意味着在线程数特别多的时候性能比ConcurrentHashMap高
 
-安全共享对象策略
+## 安全共享对象策略
 1. 线程限制：一个被线程限制的对象，由线程独占，并且只能被它占有的线程修改 -> 线程封闭
 2. 共享只读：一个共享只读的对象，在没有额外同步的情况下，可以被多个线程并发访问，但是任何线程都不能修改它 -> 不可变对象
 3. 线程安全对象：一个线程安全的对象或者容器，在内部通过同步机制来保证线程的安全，所以其他线程无需额外的同步就可以通过公共接口随意访问它 -> 同步容器
 4. 被守护对象：被守护对象只能通过获取特定的锁来访问 -> 同步容器
 
+
 ## AQS-AbstractQueuedSynchronizer
 > 核心实现图
+
 ![image](image/aqs.png)
 
 1. 使用Node实现FIFO队列，可以用于构建锁或其他同步装置的基础框架
@@ -87,13 +120,77 @@ AQS同步组件
 + Condition
 + FutureTask
 
-> **CountDownLatch**
+### CountDownLatch 计数器
 
 ![image](image/cdl.png)
 
-线程阻塞辅助类，调用await方法会阻塞当前线程，直到计数器为0的时候调用shutdown方法才会继续进行操作
+1. 线程阻塞辅助类，调用await方法会阻塞当前线程，等到计数器为0的时候才会继续执行下面的代码
+2. await(option time) 阻塞线程，time为指定时间，如果未完成直接结束任务
+3. countDown() 计数器减一
+
+### Semaphore 信号量
+
+![image](image/sem.png)
+
+1. **控制并发访问的线程个数**，在某些个场景线程并发数过高，可以使用信号量来控制一下并发
+2. acquire() 获取许可，只有拿到许可才可以执行
+3. release() 释放许可
+4. traAcquire() 尝试获取许可
+
+### CyclicBarrier 
+#### 简介
+CyclicBarrier 的字面意思是可循环使用（Cyclic）的屏障（Barrier）。
+它要做的事情是，让一组线程到达一个屏障（也可以叫同步点）时被阻塞，
+直到最后一个线程到达屏障时，屏障才会开门，所有被屏障拦截的线程才会继续干活。
+CyclicBarrier默认的构造方法是CyclicBarrier(int parties)，其参数表示屏障拦截的线程数量，
+每个线程调用await方法告诉CyclicBarrier我已经到达了屏障，然后当前线程被阻塞。[来源：并发编程网](http://ifeve.com/concurrency-cyclicbarrier/)
+![image](image/cb.png)
+
+1. 和CountDownLatch一样通过计数器来实现线程阻塞，但是它可以重置计数器，达到多次使用，CountDownLatch是一次性的
+2. 作用和CountDownLatch相反，阻塞工作线程，每次工作线程调用await方法则计数器加一，当计数器达到指定值时才会继续执行
+3. 多个线程相互等待，直到满足条件的时候，所有线程才会继续进行后续的操作
+
+## ReentrantLock(Synchronized)的区别
+### 可重入性
+### 锁的实现
+ReentrantLock依赖JDK实现
+Synchronized依赖JVM实现
+### 性能的区别
+在Synchronized没有引入偏向锁以及轻量级锁（自旋锁）的时候性能比ReentrantLock低，但是引入之后基本上差不多
+## ReentrantLock独有的功能
++ 可指定是公平锁还是非公平锁，Synchronized是公平锁
++ 提供了一个Condition类，可分组唤醒需要唤醒的线程
++ 提供能够中断等待锁的线程的机制，lock.lockInterruptibly()
+## ReentrantLock方法
++ lock()加锁
++ unlock()释放锁，一般在finally里面使用
++ tryLock() 仅在调用时锁定未被另一个线程保持的资源才会锁定资源
++ tryLock(time) 在指定的时间内等待未被另一个线程锁定的资源，且线程未被中断才会锁定
+## ReentrantReadWriteLock
+> 读写锁，大多应用于缓存的场景，缓存是一种多读少写的场景，在进行数据一致性操作的时候不能使用
+悲观锁实现，这样的话在更新数据的时候所有读取都将会进入等待状态，这个时候就需要使用到读写分离锁
+
+缺点：由于写锁只有在没有读锁的情况下才会锁定，所以在读的情况非常多的情况下会造成写饥饿
+## Synchronized
+1. 修饰代码块：大括号括起来的代码，作用于调用的对象
+2. 修饰方法：整个方法，作用于调用的对象
+3. 修饰静态方法：整个静态方法，作用于所有对象
+4. 修饰类，括号括起来的部分，作用于所有对象
+## BlockQueue
+![image](image/block_queue.png)
+1. ArrayBlockingQueue
+2. DelayQueue
+3. LinkedBlockingQueue
+4. PriorityBlockingQueue
+5. SynchronousQueue
+## Synchronized的优点
++ 简单易用
++ 永远不用关心释放锁的操作
+## Future和FutureTask
+带有返回值的异步执行,FutureTask是Future升级版本，较为容易使用
 
 ## 正确发布对象
+
 1. 在静态初始化函数中初始化一个对象引用
  ```java
  //推荐使用，线程安全而且还不会造成资源的浪费
