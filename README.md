@@ -1,6 +1,15 @@
 # 高并发
 慕课网高并发实战[课程](https://coding.imooc.com/class/195.html?mc_marking=b587280c0c1c0e76c1092aa21406565a&mc_channel=syb6)，平时学习的时候很少会接触到高并发这一模块，即使
 接触到也只是一些概念上的东西，和企业实际开发中的使用可能会有很大的出入通过这门课程的学习来和企业开发中的并发做对接
+
+## 高并发动画
+动画展示JUC包下的各个组件，有助理解，建议一边学习课程的时候一边使用该程序模拟，可以从官方下载，也可以从本项目中下载，jar包放在source文件夹下，下载成功之后，使用java -jar命令运行
+
+> 官方网址：http://sourceforge.net/projects/javaconcurrenta/
+> 下载地址：http://sourceforge.net/projects/javaconcurrenta/files/latest/download?source=files
+
+![image](image/ConcurrentAnimated.gif)
+
 <!-- MarkdownTOC -->
 
 - 线程安全性
